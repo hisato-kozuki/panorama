@@ -30,7 +30,7 @@
 
       // カメラを作成
       const camera = new THREE.PerspectiveCamera(45, width / height);
-      camera.position.set(16, 0, 0);
+      camera.position.set(160, 0, 0);
 
       // 箱を作成
       const geometry_box = new THREE.BoxGeometry(32, 20, 20);
@@ -41,49 +41,36 @@
       const material2 = new THREE.MeshBasicMaterial({color: 0xff0000});
       const material3 = new THREE.MeshBasicMaterial({color: 0xAFAFEF, side: THREE.DoubleSide});
       const material4 = new THREE.MeshBasicMaterial({color: 0x00ff00});
-      for(let i = 0; i < 2; i++){
-        for(let j = 0; j < 3; j++){
-            let base={x:16,y:72*j+216*i,z:0};
-            make_distriction(base,2,20);
-            base={x:1,y:72*j+216*i-24,z:228};
-            make_road(base,20,488);
-        }
-        for(let j = 0; j < 2; j++){
-            let base = {x:16,y:216*i,z:-72+576*j};
-            make_distriction(base,8,2);
-            base = {x:1,y:84+216*i,z:-24+504*j};
-            make_road(base,200,20);
-        }
-        let base = {x:16,y:-96+312*i,z:576};
-        make_distriction(base,12,2);
-        base = {x:16,y:-96+552*i,z:-72};
-        make_distriction(base,2,26);
-        base = {x:1,y:36+312*i,z:552};
-        make_road(base,296,20);
-        base = {x:1,y:-36+456*i,z:228};
-        make_road(base,44,632);
-      }
-        let base = {x:1,y:408,z:228};
-        make_road(base,20,488);
-        
-        const box = new THREE.Mesh(new THREE.BoxGeometry(120, 240, 240), new THREE.MeshBasicMaterial({color: 0xffffff}));
-        box.position.set(60, -252, 492);
-        scene.add(box);
 
-      function make_distriction(base, i_y, i_z){
-        for(let i = 0; i < i_y; i++){
-          for(let j = 0; j < i_z; j++){
-            const box = new THREE.Mesh(geometry_box, material);
-            box.position.set(base.x, base.y+24*i, base.z+24*j);
-            scene.add(box);
-          }
+        const texture = new THREE.TextureLoader().load('1-0-0.jpg');
+        const geometry_plane = new THREE.PlaneGeometry(148, 111);
+        const material_p = new THREE.MeshStandardMaterial({
+            map: texture
+        });
+        const mesh = new THREE.Mesh(geometry_plane, material_p);
+        mesh.rotation.x=0;
+        mesh.rotation.y=Math.PI/2;
+        mesh.rotation.z=-Math.PI/4;
+        mesh.position.set(60, 0, 0);
+        scene.add(mesh);
+        for(let i = 0; i <= 2; i++){
+            for(let j = 1; j <= 8; j++){
+                // 画像を読み込む
+                const texture = new THREE.TextureLoader().load('1-'+i+'-'+j+'.jpg');
+                const geometry_plane = new THREE.PlaneGeometry(148, 111);
+                //マテリアルにテクスチャ貼り付け
+                const material_p = new THREE.MeshStandardMaterial({
+                    map: texture
+                });
+                // メッシュを作成
+                const mesh = new THREE.Mesh(geometry_plane, material_p);
+                mesh.rotation.x=(j+2)*Math.PI/4;
+                mesh.rotation.y=-(i-1)*Math.PI/4;
+                mesh.rotation.z=-Math.PI/2;
+                mesh.position.set(160+80*Math.sin((i-1)*Math.PI/4), 100*Math.cos((i-1)*Math.PI/4)*Math.cos(j*Math.PI/4), 100*Math.cos((i-1)*Math.PI/4)*Math.sin(j*Math.PI/4));
+                scene.add(mesh);
+            }
         }
-      }
-      function make_road(base, l_y, l_z){
-        const box = new THREE.Mesh(new THREE.BoxGeometry(1, l_y, l_z), new THREE.MeshBasicMaterial({color: 0x666666}));
-        box.position.set(base.x, base.y, base.z);
-        scene.add(box);
-      }
       const plane = new THREE.Mesh(geometry3, material3);
       scene.add(plane);
       plane.position.set(-15, 0, 0);
@@ -103,14 +90,12 @@
       mouse[1]=event.offsetY/height;
       console.log("offsetX: " + event.offsetX);
       console.log("offsetY: " + event.offsetY);
-      document.getElementById("a").innerText=mouse[0]+" "+mouse[1];
     }
     function logPosition2(event) {
       event.preventDefault();
       console.log(event);
       mouse[0]=event.changedTouches[0].pageX/width;
       mouse[1]=event.changedTouches[0].pageY/height;
-      document.getElementById("a").innerText=mouse[0]+" "+mouse[1];
     }
 
       const light3 = new THREE.DirectionalLight(0xffffff, 1);
