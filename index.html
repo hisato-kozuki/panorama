@@ -1,0 +1,163 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.167.0/build/three.module.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+
+      // サイズを指定
+      const width = 1200;
+      const height = 640;
+      let mouse=[0,0];
+      let direction = {x:0,y:0}
+      let number = 0;
+
+      // レンダラーを作成
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.querySelector("#myCanvas"),
+      });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
+
+      // シーンを作成
+      const scene = new THREE.Scene();
+
+      // カメラを作成
+      const camera = new THREE.PerspectiveCamera(45, width / height);
+      camera.position.set(16, 0, 0);
+
+      // 箱を作成
+      const geometry_box = new THREE.BoxGeometry(32, 20, 20);
+      const geometry2 = new THREE.SphereGeometry(10, 10, 10);
+      const geometry3 = new THREE.PlaneGeometry(10000, 10000);
+      const geometry4 = new THREE.SphereGeometry(100, 100, 100);
+      const material = new THREE.MeshStandardMaterial({color: 0xFFFFFF, roughness: 0.5});
+      const material2 = new THREE.MeshBasicMaterial({color: 0xff0000});
+      const material3 = new THREE.MeshBasicMaterial({color: 0xAFAFEF, side: THREE.DoubleSide});
+      const material4 = new THREE.MeshBasicMaterial({color: 0x00ff00});
+      for(let i = 0; i < 2; i++){
+        for(let j = 0; j < 3; j++){
+            let base={x:16,y:72*j+216*i,z:0};
+            make_distriction(base,2,20);
+            base={x:1,y:72*j+216*i-24,z:228};
+            make_road(base,20,488);
+        }
+        for(let j = 0; j < 2; j++){
+            let base = {x:16,y:216*i,z:-72+576*j};
+            make_distriction(base,8,2);
+            base = {x:1,y:84+216*i,z:-24+504*j};
+            make_road(base,200,20);
+        }
+        let base = {x:16,y:-96+312*i,z:576};
+        make_distriction(base,12,2);
+        base = {x:16,y:-96+552*i,z:-72};
+        make_distriction(base,2,26);
+        base = {x:1,y:36+312*i,z:552};
+        make_road(base,296,20);
+        base = {x:1,y:-36+456*i,z:228};
+        make_road(base,44,632);
+      }
+        let base = {x:1,y:408,z:228};
+        make_road(base,20,488);
+        
+        const box = new THREE.Mesh(new THREE.BoxGeometry(120, 240, 240), new THREE.MeshBasicMaterial({color: 0xffffff}));
+        box.position.set(60, -252, 492);
+        scene.add(box);
+
+      function make_distriction(base, i_y, i_z){
+        for(let i = 0; i < i_y; i++){
+          for(let j = 0; j < i_z; j++){
+            const box = new THREE.Mesh(geometry_box, material);
+            box.position.set(base.x, base.y+24*i, base.z+24*j);
+            scene.add(box);
+          }
+        }
+      }
+      function make_road(base, l_y, l_z){
+        const box = new THREE.Mesh(new THREE.BoxGeometry(1, l_y, l_z), new THREE.MeshBasicMaterial({color: 0x666666}));
+        box.position.set(base.x, base.y, base.z);
+        scene.add(box);
+      }
+      const plane = new THREE.Mesh(geometry3, material3);
+      scene.add(plane);
+      plane.position.set(-15, 0, 0);
+      plane.rotation.y=Math.PI/2;
+      camera.rotation.z=Math.PI/2;
+      const key = {
+        ArrowUp:0,ArrowDown:0,ArrowLeft:0,ArrowRight:0,
+      }
+
+      document.getElementById("myCanvas").addEventListener('mousemove', logPosition1);
+      document.getElementById("myCanvas").addEventListener('touchmove', logPosition2);
+
+    function logPosition1(event) {
+      event.preventDefault();
+      console.log(event);
+      mouse[0]=event.offsetX/width;
+      mouse[1]=event.offsetY/height;
+      console.log("offsetX: " + event.offsetX);
+      console.log("offsetY: " + event.offsetY);
+      document.getElementById("a").innerText=mouse[0]+" "+mouse[1];
+    }
+    function logPosition2(event) {
+      event.preventDefault();
+      console.log(event);
+      mouse[0]=event.changedTouches[0].pageX/width;
+      mouse[1]=event.changedTouches[0].pageY/height;
+      document.getElementById("a").innerText=mouse[0]+" "+mouse[1];
+    }
+
+      const light3 = new THREE.DirectionalLight(0xffffff, 1);
+      light3.position.set(-1, 1, 0);
+      scene.add(light3);
+      const light4 = new THREE.DirectionalLight(0xffffff, 1);
+      light4.position.set(-1, -1, 1);
+      scene.add(light4);
+      const light5 = new THREE.DirectionalLight(0xffffff, 1);
+      light5.position.set(-1, -1, -1);
+      scene.add(light5);
+      const light6 = new THREE.DirectionalLight(0xffffff, 1);
+      light6.position.set(1, 0, 0);
+      scene.add(light6);
+
+      document.addEventListener("keydown", function(event){key[event.code]=1;console.log(key)});
+      document.addEventListener("keyup", function(event){key[event.code]=0;console.log(key)});
+
+      tick();
+
+      // 毎フレーム時に実行されるループイベントです
+      function tick() {
+        if(key.ArrowUp || key.ArrowDown){
+          if(key.ArrowUp){
+            camera.position.y+=2*(1-mouse[1])*Math.cos((0.25-mouse[0])*2*Math.PI+direction.x);
+            camera.position.z+=2*(1-mouse[1])*Math.sin((0.25-mouse[0])*2*Math.PI+direction.x);
+          }
+          if(key.ArrowDown){
+            camera.position.y-=2*(1-mouse[1])*Math.cos((0.25-mouse[0])*2*Math.PI+direction.x);
+            camera.position.z-=2*(1-mouse[1])*Math.sin((0.25-mouse[0])*2*Math.PI+direction.x);
+          }
+        }
+        if(key.ArrowLeft)direction.x+=0.02;
+        if(key.ArrowRight)direction.x-=0.02;
+        camera.rotation.x=(-mouse[0])*2*Math.PI+direction.x;
+        camera.rotation.y=(-mouse[1]+1.5)*Math.PI;
+        const p1=[1000*Math.sin(Date.now() / 3000),1000*Math.cos(Date.now() / 1000),1000*Math.sin(Date.now() / 1000)];
+        const p2=[80+100*Math.cos(Date.now() / 1000),80*Math.sin(Date.now() / 1000)*Math.cos(Date.now() / 4000),80*Math.sin(Date.now() / 1000)*Math.sin(Date.now() / 4000)];
+
+        //light.lookAt(new THREE.Vector3(0, 0, 0));
+        renderer.render(scene, camera) // レンダリング
+
+        requestAnimationFrame(tick);
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="myCanvas"></canvas>
+  </body>
+</html>
